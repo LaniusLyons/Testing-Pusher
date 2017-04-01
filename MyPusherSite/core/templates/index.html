@@ -24,7 +24,9 @@
 
     var channel = pusher.subscribe('my-channel');
     channel.bind('my-event', function(data) {
-      alert(data.message);
+    	console.log(data);
+    	var html = `<li>${data.message}</li>`;
+    	$('#messages').append(html);
     });
     </script>
   </body>
