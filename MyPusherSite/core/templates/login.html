@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PUSHER</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="content">
+        <h1>Django and Pusher is fun1!</h1>
+        <div>
+          <form action="{% url 'login' %}" method="POST">
+          {% csrf_token %}
+            <input type="text" name="email">
+            <input type="password" name="password">
+            <button type="submit">Ingresar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
