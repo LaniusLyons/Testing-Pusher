@@ -20,9 +20,6 @@ def generate_slug():
 
 class Perfil(Usuario):
 
-	class Meta:
-		proxy = True
-
 	CUSTOMER  = 'Us' 
 	ADMINISTRATOR = 'Ad'
 	GUARD = 'Gd'
@@ -40,6 +37,9 @@ class Perfil(Usuario):
 
 	class Meta:
 		db_table = 'Perfil'
+
+	def getChanelName(self):
+		return 'univ_' + self.fk_universidad.slug
 
 # Create your models here.
 

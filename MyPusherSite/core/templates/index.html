@@ -8,8 +8,10 @@
     <div class="container">
       <div class="content">
         <h1>Django and Pusher is fun1!</h1>
-        <a href="{% url 'logout' %}" class="pull-right"></a>
+        <a href="{% url 'logout' %}" class="pull-right">Logout</a>
         <div style="clear:both;"></div>
+        <input type="text" name="text" id="text">
+        <button id="posting">POST</button>
         <ul id="messages" class="list-group">
         </ul>
       </div>
@@ -17,6 +19,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://js.pusher.com/3.1/pusher.min.js"></script>
     <script>
+    function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+  }
+  var csrftoken = getCookie('csrftoken');
+
     // Enable pusher logging - don't include this in production
     Pusher.logToConsole = true;
 
@@ -29,6 +48,44 @@
     	console.log(data);
     	var html = `<li>${data.message}</li>`;
     	$('#messages').append(html);
+    });
+
+    var channel2 = pusher.subscribe('{{user.perfil.getChanelName}}');
+    channel2.bind('check-code', function(data) {
+          var html = `<li>${data.message}</li>`;
+          $('#messages').append(html);
+    });
+
+    $('#posting').click(function(id){
+      var text = $('#text').val();
+      $.ajax({
+          // la URL para la petición
+          url : '/posting/',
+          // la información a enviar
+          // (también es posible utilizar una cadena de datos)
+          data : { 'text' : text ,'csrfmiddlewaretoken' : '{{ csrf_token }}'},
+          // especifica si será una petición POST o GET
+          type : 'POST',
+          // el tipo de información que se espera de respuesta
+          dataType : 'json',
+          // código a ejecutar si la petición es satisfactoria;
+          // la respuesta es pasada como argumento a la función
+          success : function(json) {
+              var html = `<li>${json.message}</li>`;
+              $('#messages').append(html);
+          },
+          // código a ejecutar si la petición falla;
+          // son pasados como argumentos a la función
+          // el objeto de la petición en crudo y código de estatus de la petición
+          error : function(xhr, status) {
+              console.log('Disculpe, existió un problema '+status);
+          },
+          // código a ejecutar sin importar si la petición falló o no
+          complete : function(xhr, status) {
+              console.log(status);
+          }
+      });
+      //channel2.trigger('client-check-code', {code: text});
     });
     </script>
   </body>

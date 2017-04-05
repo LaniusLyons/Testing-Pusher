@@ -8,6 +8,9 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+
+pusher = __import__('pusher')
 
 def module_exists(module_name):
 	try:
@@ -22,7 +25,7 @@ def module_exists(module_name):
 
 @login_required(login_url='/login/')
 def index(request):
-	pusher = __import__('pusher')
+	#pusher = __import__('pusher')
 	pusher_client = pusher.Pusher(
 		app_id=settings.PUSHER_APP_ID,
 		key=settings.PUSHER_KEY,
@@ -30,6 +33,7 @@ def index(request):
 		ssl=True
 	)	
 	pusher_client.trigger('my-channel', 'my-event', {'message': 'hello world'})
+	pusher_client.trigger(request.user.perfil.getChanelName(), 'check-code', {'message': 'Conectado'})
 	return render(request,'index.html',{'key':settings.PUSHER_KEY})
 
 
@@ -66,3 +70,16 @@ def login(request):
 		return render(request,'login.html',{'error':message})
 	else:
 		return render(request,'login.html')
+
+
+@login_required(login_url='/login/')
+def posting(request):
+	print 'holi', request.POST.get('text',None)
+	pusher_client = pusher.Pusher(
+		app_id=settings.PUSHER_APP_ID,
+		key=settings.PUSHER_KEY,
+		secret=settings.PUSHER_SECRET,
+		ssl=True
+	)	
+	pusher_client.trigger(request.user.perfil.getChanelName(), 'check-code', {'message':'CHECK CODE - POSTING'})
+	return JsonResponse({'message':'CHECK CODE - POSTING'})
