@@ -19,6 +19,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://js.pusher.com/3.1/pusher.min.js"></script>
     <script>
+
+    $.ajaxSetup({
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+      }
+    });
+
     function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie != '') {
@@ -86,7 +93,7 @@
           url : '/posting/',
           // la información a enviar
           // (también es posible utilizar una cadena de datos)
-          data : { 'text' : text ,'csrfmiddlewaretoken' : '{{ csrf_token }}'},
+          data : { 'text' : text ,'X-CSRFToken' : '{{ csrf_token }}'},
           // especifica si será una petición POST o GET
           type : 'POST',
           // el tipo de información que se espera de respuesta

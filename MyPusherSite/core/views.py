@@ -76,7 +76,7 @@ def login(request):
 @login_required(login_url='/login/')
 def posting(request):
 	print 'holi', request.POST.get('text',None)	
-	pusher_client.trigger(request.user.perfil.getChanelName(), 'check-code', {'message':'CHECK CODE - POSTING'})
+	pusher_client.trigger('private-'+request.user.perfil.getChanelName(), 'check-code', {'message':'CHECK CODE - POSTING'})
 	return JsonResponse({'message':'CHECK CODE - POSTING'})
 
 
