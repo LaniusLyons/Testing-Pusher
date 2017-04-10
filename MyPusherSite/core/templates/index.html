@@ -34,13 +34,36 @@
     }
     return cookieValue;
   }
-  var csrftoken = getCookie('csrftoken');
+
+  function getCookie2(c_name)
+{
+    if (document.cookie.length > 0)
+    {
+        c_start = document.cookie.indexOf(c_name + "=");
+        if (c_start != -1)
+        {
+            c_start = c_start + c_name.length + 1;
+            c_end = document.cookie.indexOf(";", c_start);
+            if (c_end == -1) c_end = document.cookie.length;
+            return unescape(document.cookie.substring(c_start,c_end));
+        }
+    }
+    return "";
+ }
+
+  var csrftoken = getCookie2('csrftoken');
 
     // Enable pusher logging - don't include this in production
     Pusher.logToConsole = true;
 
     var pusher = new Pusher('{{key}}', {
-      encrypted: true
+      encrypted: true,
+      authEndpoint: '/auth_pusher/',
+      auth: {
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}'
+        }
+      }
     });
 
     var channel = pusher.subscribe('my-channel');
@@ -50,7 +73,7 @@
     	$('#messages').append(html);
     });
 
-    var channel2 = pusher.subscribe('{{user.perfil.getChanelName}}');
+    var channel2 = pusher.subscribe('private-{{user.perfil.getChanelName}}');
     channel2.bind('check-code', function(data) {
           var html = `<li>${data.message}</li>`;
           $('#messages').append(html);
@@ -71,8 +94,7 @@
           // código a ejecutar si la petición es satisfactoria;
           // la respuesta es pasada como argumento a la función
           success : function(json) {
-              var html = `<li>${json.message}</li>`;
-              $('#messages').append(html);
+              console.log('success');
           },
           // código a ejecutar si la petición falla;
           // son pasados como argumentos a la función

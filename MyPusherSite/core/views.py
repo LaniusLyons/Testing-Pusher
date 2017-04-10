@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+import json
 
 pusher = __import__('pusher')
 
@@ -20,18 +21,18 @@ def module_exists(module_name):
 	else:
 		return True
 
+pusher_client = pusher.Pusher(
+	app_id=settings.PUSHER_APP_ID,
+	key=settings.PUSHER_KEY,
+	secret=settings.PUSHER_SECRET,
+	ssl=True
+)
 
 # Create your views here.
 
 @login_required(login_url='/login/')
 def index(request):
 	#pusher = __import__('pusher')
-	pusher_client = pusher.Pusher(
-		app_id=settings.PUSHER_APP_ID,
-		key=settings.PUSHER_KEY,
-		secret=settings.PUSHER_SECRET,
-		ssl=True
-	)	
 	pusher_client.trigger('my-channel', 'my-event', {'message': 'hello world'})
 	pusher_client.trigger(request.user.perfil.getChanelName(), 'check-code', {'message': 'Conectado'})
 	return render(request,'index.html',{'key':settings.PUSHER_KEY})
@@ -74,12 +75,22 @@ def login(request):
 
 @login_required(login_url='/login/')
 def posting(request):
-	print 'holi', request.POST.get('text',None)
-	pusher_client = pusher.Pusher(
-		app_id=settings.PUSHER_APP_ID,
-		key=settings.PUSHER_KEY,
-		secret=settings.PUSHER_SECRET,
-		ssl=True
-	)	
+	print 'holi', request.POST.get('text',None)	
 	pusher_client.trigger(request.user.perfil.getChanelName(), 'check-code', {'message':'CHECK CODE - POSTING'})
 	return JsonResponse({'message':'CHECK CODE - POSTING'})
+
+
+
+def auth_pusher(request):
+	if request.user:
+		if request.user.is_authenticated():
+			channel = request.POST.get('channel_name',None)
+			socket_id = request.POST.get('socket_id',None)
+			if channel and socket_id:
+				auth = pusher_client.authenticate(
+					channel= channel,
+					socket_id=socket_id
+					)
+				return HttpResponse(json.dumps(auth), content_type="application/json")
+	return JsonResponse({'message':'No Authenticated'})
+
